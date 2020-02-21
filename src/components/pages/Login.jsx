@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
 import { MDBIcon } from "mdbreact";
 import { Button, Card, CardBody, CardGroup, Col, Container, Form, Input, InputGroup, InputGroupAddon, InputGroupText, Row } from 'reactstrap';
+import Spin from './../spinner/Spin';
+import auth from './../../_services/userService/auth';
+
 
 class Login extends Component {
   constructor(props){
@@ -36,6 +39,11 @@ class Login extends Component {
     }
 
     this.setState({ loading: true });
+    auth.login(() => {
+        this.props.history.push("/dashbord/");
+    });
+    this.setState({loading:false})
+    
     //console.log(username);
     //console.log(password);
     
@@ -43,6 +51,7 @@ class Login extends Component {
   render() {
     const { username, password, submitted, loading, error } = this.state;
     return (
+      <div style={{minHeight: "1vh", height:"100%"}}>
       <div className="app flex-row align-items-center align-middle justify-content-center">
         <Container className="justify-content-center">
           <Row className="justify-content-center">
@@ -73,16 +82,25 @@ class Login extends Component {
                       </InputGroup>
                       <Row>
                         <Col xs="6">
-                          <Button color="primary" className="px-4" onClick={this.handleLogin}>Login</Button>
+                          <Button className="px-4 grey darken-3" disabled={loading} onClick={this.handleLogin}>
+                            
+                            {loading ?
+                              <Spin size="sm" />
+                              :
+                              "Login"
+                            }
+                            
+                          
+                          </Button>
                         </Col>
                         <Col xs="6" className="text-right">
-                          <Button color="link" className="px-0">Forgot password?</Button>
+                          
                         </Col>
                       </Row>
                     </Form>
                   </CardBody>
                 </Card>
-                <Card className="text-white bg-primary py-5 d-md-down-none">
+                <Card className="text-white grey darken-3 py-5 d-md-down-none">
                   <CardBody className="text-center">
                     <div>
                       <h2>Welcome to ihome</h2>
@@ -95,6 +113,7 @@ class Login extends Component {
             </Col>
           </Row>
         </Container>
+      </div>
       </div>
     );
   }

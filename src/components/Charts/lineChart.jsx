@@ -1,52 +1,94 @@
 import React from "react";
 import { Line } from "react-chartjs-2";
 import { MDBContainer } from "mdbreact";
-import getMedata from './../../_services/dataService/importData';
+import {getMedata, getRangeData} from './../../_services/dataService/importData';
+
+
+import Box from './../box/Box';
+
+
+import { connect } from 'react-redux';
+import {setFreq, setMyDuration} from './../../actions';
 
 class ChartsPage extends React.Component {
     
     constructor(props){
         super(props);
+        const f = this.props.my_freq;
+        const i = this.props.my_duration;
         this.state = {
           labels:[],
-          data:[]
-        }
+          data:[],
+          name: this.props.title,
+          freq: f,
+          duration: i,
+        }    
+    }
+
+    
+    componentWillReceiveProps({my_freq, my_duration, init_data}){
+      
+      //console.log(this.state);
+      this.setState({
+        labels:[],
+        data:[]
+      })
+
+      const f = my_freq;
+      const i = my_duration;
+
+      //console.log("I recieved f and duration as ", f, i);
+
+      this.setState({
+        freq: f,
+        duration: i,
+      })
+
+      let res = init_data
+      //console.log("Chart Mount I recieved ", res);
+      this.setState({
+        labels: res.label,
+        data: res.data,
         
+      })
+
+      
+      clearInterval(this.interval);
+      //console.log("OUT INTERVAL STATE:: ", this.state.labels);
+      //console.log("OUT INTERVAL RECV:: ", init_data.label);
+      console.log("OUTSIDE INTERVAL::", my_freq)
+      this.interval = setInterval(() => {
+        console.log("INSIDE INTERVAL:: ",my_freq)
+        //console.log("INSIDE INTERVAL:: ", this.state.labels);
+        this.setState(
+        { 
+            labels: this.state.labels.concat([this.state.labels[this.state.labels.length-1]+this.props.my_freq*1000]),
+            data: this.state.data.concat([getMedata()])
+        })
+        let new_l = [...this.state.labels];
+        let new_d = [...this.state.data];
+        new_l.shift();
+        new_d.shift();
+        this.setState(
+          { 
+              labels: new_l,
+              data: new_d
+          })
+
+          //clearInterval(this.interval);
+          //this.interval = setInterval(cb, this.state.freq);
+          
+    }, my_freq*1000 
+    );
     }
     
 
     componentDidMount() {
-      let l = [];
-      let d = [];
-      for(let i=0; i<10; i++)
-      {
-        l.push(getMedata());
-        d.push(getMedata());
-      }
-      this.setState({
-        labels: l,
-        data: d
-      })
-      this.interval = setInterval(() => {
-          //console.log(this.state);
-          this.setState(
-          { 
-              labels: this.state.labels.concat([getMedata()]),
-              data: this.state.data.concat([getMedata()])
-          })
-          let new_l = [...this.state.labels];
-          let new_d = [...this.state.data];
-          new_l.shift();
-          new_d.shift();
-          this.setState(
-            { 
-                labels: new_l,
-                data: new_d
-            })
-      }, 5000  
-      );
-      console.log(this.state);
+      
     }
+  componentWillMount(){
+    
+  }
 
   render() {
     let database = {
@@ -65,8 +107,8 @@ class ChartsPage extends React.Component {
           borderJoinStyle: "miter",
           pointBorderColor: "rgb(35, 26, 136)",
           pointBackgroundColor: "rgb(255, 255, 255)",
-          pointBorderWidth: 10,
-          pointHoverRadius: 5,
+          pointBorderWidth: 1,
+          pointHoverRadius: 1,
           pointHoverBackgroundColor: "rgb(0, 0, 0)",
           pointHoverBorderColor: "rgba(220, 220, 220, 1)",
           pointHoverBorderWidth: 2,
@@ -77,13 +119,58 @@ class ChartsPage extends React.Component {
       ]
       }
     };
+
+
+    const options = {
+      responsive: true, 
+      animation: {duration: 0},
+      scales: {
+        xAxes: [{
+            type: 'time',
+            display: true,
+            scaleLabel: {
+                display: true,
+                labelString: "Time",
+            }
+        }],
+        yAxes: [{
+            ticks: {
+                beginAtZero: true,
+            },
+            display: true,
+            scaleLabel: {
+                display: true,
+                labelString: "temp in degree c",
+            }
+        }]
+    }
+    }
+    
     return (
-      <MDBContainer>
-        <h3 className="mt-5">{this.props.title}</h3>
-        <Line data={database.dataLine} options={{ responsive: true }} />
-      </MDBContainer>
+        <MDBContainer>
+          
+          <Box size="30px"></Box>
+        
+        
+        <Line data={database.dataLine} options={options} />
+        </MDBContainer>
+
     );
   }
 }
 
-export default ChartsPage;
+const mapStateToProps = ({freq, duration }) => ({
+  freq,
+  duration
+})
+
+const mapDispatchToProps = (dispatch) => ({
+  setFreq: (freq) => dispatch(setFreq(freq)),
+  setMyDuration: (duration) => dispatch(setMyDuration(duration)),
+})
+
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(ChartsPage);
