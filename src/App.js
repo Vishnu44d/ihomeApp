@@ -13,6 +13,7 @@ import Devices from './layouts/Devices';
 import Dashbord from './layouts/Dashbord';
 import EditDashbord from './layouts/EditDash';
 import {ProtectedRoute} from './protectedRoute';
+import {UnProtectedRoute} from './unProtectedRoute';
 
 
 
@@ -27,8 +28,8 @@ class App extends Component {
     return (
       <BrowserRouter >
           <Route path="*" component={NavBar}></Route>
-          <Route exact path="/" component={Login}></Route>
-          <Route path="/login" component={Login}></Route>
+          <UnProtectedRoute exact path="/" component={Login}></UnProtectedRoute>
+          <UnProtectedRoute path="/login" component={Login}></UnProtectedRoute>
           <ProtectedRoute path="/devices" component={Devices}></ProtectedRoute>
           <ProtectedRoute path="/dashbord" component={Dashbord}></ProtectedRoute>
           <ProtectedRoute path="/editDevices" component={EditDashbord}></ProtectedRoute>
