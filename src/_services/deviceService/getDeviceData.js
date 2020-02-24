@@ -1,5 +1,5 @@
+
 export default function getDataOf(name){
-    console.log("getData called")
     let res = {
         name: name,
         graphName: "Temperature v/s time",

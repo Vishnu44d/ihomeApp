@@ -5,7 +5,9 @@ export default function getMyDevices(){
         let g = {
             name: `name${i}`,
             location: `loaction-${i}`,
-            status: Math.round(Math.random())===0?false:true
+            port: `port_${i+1}`,
+            status: Math.round(Math.random())===0?false:true,
+            id: `id-${9-i}`
         }
         r.push(g);
     }

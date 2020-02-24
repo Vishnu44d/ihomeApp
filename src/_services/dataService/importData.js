@@ -12,21 +12,21 @@ function DateOffset( offset ) {
 function getRangeData(freq, duration){
     let l = []
     let d = []
-    //console.log("DURATION:: ", duration)
-    //console.log("FREQ--:: ", freq)
+    console.log("DURATION:: ", duration)
+    console.log("FREQ--:: ", freq)
     let j;
-    let dd = Date.now();
-    console.log(new Date(dd));
-    dd = dd-duration*60*1000;
-    console.log("-date Dte ", dd, " ", new Date(dd));
-    for(let i=0; i<=duration*10; i+=freq)
+    let dd1 = Date.now();
+    //console.log(new Date(dd1));
+    let dd = dd1-duration*60*1000;
+    //console.log("-date Dte ", dd, " ", new Date(dd));
+    for(let i=1; dd<dd1; i=i+freq)
     {
-        dd = dd + i*1000;
-        //console.log("+new date , i", dd, " ",i)
+        dd = dd + freq*1000;
+        //console.log("+new date , i",i,"  ", new Date(dd));
         l.push(dd);
         d.push(getMedata());
     }
-    console.log(l)
+    //console.log(l)
     return {
         label: l,
         data: d,

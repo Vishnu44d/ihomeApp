@@ -67,6 +67,16 @@ class Devices extends Component {
         });
         
     }
+
+    componentWillReceiveProps(nextProps){
+        //console.log("Recieve props", nextProps);
+        this.setState({loading:true})
+        this.setState({
+            init_data: getRangeData(parseInt(nextProps.freq), parseInt(nextProps.duration))
+        })
+        this.setState({loading:false})
+    }
+
     componentWillMount(){
         
         

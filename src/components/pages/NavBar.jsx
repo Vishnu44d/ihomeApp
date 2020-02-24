@@ -19,7 +19,7 @@ import {
   NavbarText,
   Button
 } from 'reactstrap';
-import {Link, Redirect} from 'react-router-dom';
+import {Link} from 'react-router-dom';
 
 class NavBar extends Component{
   constructor(props){
@@ -66,7 +66,10 @@ class NavBar extends Component{
               <Link to="/dashbord"><NavLink className="text-white">Dashboard</NavLink></Link>
               </NavItem>
               <NavItem>
-                <NavLink href="https://github.com/reactstrap/reactstrap" className="text-white">GitHub</NavLink>
+              <Link to="/editdevices"><NavLink className="text-white">Edit</NavLink></Link>
+              </NavItem>
+              <NavItem>
+                <NavLink href="" className="text-white">GitHub</NavLink>
               </NavItem>
               <UncontrolledDropdown nav inNavbar>
                 <DropdownToggle nav caret className="text-white">
@@ -102,7 +105,7 @@ class NavBar extends Component{
                       <MDBIcon icon="user-alt" />
                     </DropdownToggle>
                     <DropdownMenu>
-                      <DropdownItem>Another Action</DropdownItem>
+                      <DropdownItem ><Link to="/profile"><span className="text-black">View Profile</span></Link></DropdownItem>
                       <DropdownItem>
                         <Button to="/" className="px-4 grey darken-3" disabled={loading} onClick={this.handleLogout}> 
                           {loading ?

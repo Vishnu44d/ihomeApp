@@ -56,13 +56,13 @@ class ChartsPage extends React.Component {
       clearInterval(this.interval);
       //console.log("OUT INTERVAL STATE:: ", this.state.labels);
       //console.log("OUT INTERVAL RECV:: ", init_data.label);
-      console.log("OUTSIDE INTERVAL::", my_freq)
+      //console.log("OUTSIDE INTERVAL::", my_freq)
       this.interval = setInterval(() => {
-        console.log("INSIDE INTERVAL:: ",my_freq)
+        //console.log("INSIDE INTERVAL:: ",my_freq)
         //console.log("INSIDE INTERVAL:: ", this.state.labels);
         this.setState(
         { 
-            labels: this.state.labels.concat([this.state.labels[this.state.labels.length-1]+this.props.my_freq*1000]),
+            labels: this.state.labels.concat([new Date()]),
             data: this.state.data.concat([getMedata()])
         })
         let new_l = [...this.state.labels];
