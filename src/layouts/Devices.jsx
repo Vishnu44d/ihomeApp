@@ -10,6 +10,7 @@ import {getRangeData} from './../_services/dataService/importData';
 import {Col, Row} from 'reactstrap';
 import DropMenu from './../components/dropdown/DropMenu';
 import Spin from './../components/spinner/Spin';
+import Toast from './../components/toast/Toast';
 
 import { connect } from 'react-redux';
 import {setFreq, setMyDuration} from './../actions';
@@ -19,6 +20,7 @@ class Devices extends Component {
         super(props)
         this.state = {
             device_name: "",
+            device_id: "",
             min: null,
             max: null,
             currentValue: 0,
@@ -27,53 +29,90 @@ class Devices extends Component {
             Graphlabel: "",
             graphName: "",
             loading: false,
-            init_data: null
+            init_data: {
+                label:[],
+                data:[]
+            },
+            error: false,
+            err_msg: ''
 
         }
     }
     
     componentDidMount(){
-        let r = getDataOf(this.state.device_name);
+        let name = this.props.history.location.pathname.split("/")
+        name = name[2]+"/"+name[3]
+        let r = getDataOf(name, this.props.devices);
+        if(r===null)
+        {
+            this.setState({error:true, err_msg:"No such device!"})
+            console.log("r is null")
+            return;
+        }
+        console.log(r)
         this.setState({loading:true})
         this.setState({
-            device_name: this.props.history.location.pathname.split("/")[2],
-            min: r.min+1,
-            max: r.max,
-            about: r.about,
+            device_name: name,
+            device_id:r.id,
+            min: r.min_intensity,
+            max: r.max_intensity,
+            about: [r.desc],
             location: r.location,
-            currentValue: r.curr_value,
-            Graphlabel: r.Graphlabel,
-            graphName: r.graphName,
-            init_data: getRangeData(parseInt(this.props.freq), parseInt(this.props.duration))
+            currentValue: r.cur_intensity,
+            Graphlabel: r.desc,
+            graphName: r.desc,
+        })
+        getRangeData(r.id, this.props.duration, this.props.token).then(res=>{
+            console.log(res)
+            this.setState({
+                init_data: res
+            })
         })
         this.setState({loading:false})
         this.unlisten = this.props.history.listen((location, action) => {
             //console.log("on route change ", location);
             this.setState({loading:true})
-            let r = getDataOf(this.state.device_name);
-
+            let name = this.props.history.location.pathname.split("/")
+            name = name[2]+"/"+name[3]
+            let r = getDataOf(name, this.props.devices);
+            if(r===null)
+            {
+                this.setState({error:true, err_msg:"No such device!"})
+                console.log("r is null")
+                return
+            }
             this.setState({
-                device_name: this.props.history.location.pathname.split("/")[2],
-                min: r.min,
-                max: r.max,
-                about: r.about,
+                device_name: name,
+                device_id:r.id,
+                min: r.min_intensity,
+                max: r.max_intensity,
+                about: [r.desc],
                 location: r.location,
-                currentValue: r.curr_value,
-                Graphlabel: r.Graphlabel,
-                graphName: r.graphName,
-                init_data: getRangeData(parseInt(this.props.freq), parseInt(this.props.duration))
+                currentValue: r.cur_intensity,
+                Graphlabel: r.desc,
+                graphName: r.desc,
+            })
+            getRangeData(r.id, this.props.duration, this.props.token).then(res=>{
+                this.setState({
+                    init_data: res
+                })
             })
             this.setState({loading:false})
         });
         
     }
 
+
     componentWillReceiveProps(nextProps){
         //console.log("Recieve props", nextProps);
         this.setState({loading:true})
-        this.setState({
-            init_data: getRangeData(parseInt(nextProps.freq), parseInt(nextProps.duration))
+        getRangeData(this.state.device_id, nextProps.duration, this.props.token).then(res=>{
+            console.log(res);
+            this.setState({
+                init_data: res
+            })
         })
+        
         this.setState({loading:false})
     }
 
@@ -86,70 +125,79 @@ class Devices extends Component {
     render() {
         //console.log(this.props.history.location.pathname)
         //const device_name = this.props.history.location.pathname.split("/")[2]
-        const {device_name, min, max, currentValue, location, about,Graphlabel, graphName } = this.state;
+        const {device_name, min, max, currentValue, about, graphName } = this.state;
         const init_data = this.state.init_data;
-        console.log("INSIDE DEVICES:: ", init_data)
-        return (
-            <MDBContainer>
-                <AboutCard about={about} name={this.state.device_name}/>
-                <Box size="50px" />
-                <Row>
-                    <Col md={8} sm={1}>
-                    <h3>{graphName}</h3>
-                    </Col>
-                    <Col md={4} sm={11} >
+        console.log("INSIDE DEVICES:: ", this.state.device_id)
+        if(this.state.error){
+            return <Toast msg={this.state.err_msg}/>
+        }
+        else{
+            return (
+                
+                <MDBContainer>
+                    <AboutCard about={about} name={this.state.device_name}/>
+                    <Box size="50px" />
                     <Row>
-                        <Col className="text-right">
-                        <DropMenu
-                            shortdurations={shortfrequency}
-                            longdurations={longfrequency}
-                            icon="retweet"
-                            purpose="refresh rate"
-                            data={this.props.freq}
-                        />
+                        <Col md={8} sm={1}>
+                        <h3>{graphName}</h3>
                         </Col>
-                        <Col className="text-left" >
-                        <DropMenu
-                        shortdurations={shortdurations}
-                        longdurations={longdurations}
-                        icon="clock"
-                        purpose="duration"
-                        data={this.props.duration}
-                        />
+                        <Col md={4} sm={11} >
+                        <Row>
+                            <Col className="text-right">
+                            <DropMenu
+                                shortdurations={shortfrequency}
+                                longdurations={longfrequency}
+                                icon="retweet"
+                                purpose="refresh rate"
+                                data={this.props.freq}
+                            />
+                            </Col>
+                            <Col className="text-left" >
+                            <DropMenu
+                            shortdurations={shortdurations}
+                            longdurations={longdurations}
+                            icon="clock"
+                            purpose="duration"
+                            data={this.props.duration}
+                            />
+                            </Col>
+                        </Row>
+                        
                         </Col>
                     </Row>
+                    {
+                        this.state.loading?<div className="text-center"><Box size="75px" /><Spin size="lg" lastColor="dark"/><p>Loading Chart . . .</p><Box size="75px" /></div>:
+                        <div>
+                        <ChartsPage
+                        my_freq={parseInt(this.props.freq)}
+                        my_duration={parseInt(this.props.duration)}
+                        init_data={init_data}
+                        device_id={this.state.device_id}
+                        />
+                        <Box size="50px" />
+                        <Range
+                        data = {{
+                            device: device_name,
+                            min: min,
+                            max: max,
+                            currentValue: currentValue
+                        }}
+                        />
+                        </div>
+                    }
                     
-                    </Col>
-                </Row>
-                {
-                    this.state.loading?<div className="text-center"><Box size="75px" /><Spin size="lg" lastColor="dark"/><p>Loading Chart . . .</p><Box size="75px" /></div>:
-                    <div>
-                    <ChartsPage
-                    my_freq={parseInt(this.props.freq)}
-                    my_duration={parseInt(this.props.duration)}
-                    init_data={init_data}
-                    />
-                    <Box size="50px" />
-                    <Range
-                    data = {{
-                        device: device_name,
-                        min: min,
-                        max: max,
-                        currentValue: currentValue
-                    }}
-                    />
-                    </div>
-                }
-                
-            </MDBContainer>
-        )
+                </MDBContainer>
+            )
+        }
     }
 }
 
 
-const mapStateToProps = ({freq, duration }) => ({
+const mapStateToProps = ({freq, duration, token, devices }) => ({
     freq,
-    duration
+    duration,
+    token,
+    devices,
   })
   
   const mapDispatchToProps = (dispatch) => ({

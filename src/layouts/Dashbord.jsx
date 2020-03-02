@@ -2,12 +2,29 @@ import React, { Component } from 'react';
 import Tables from './../components/tables/Tables';
 import getMyDevices from './../_services/deviceService/getAllDevice';
 
-export default class Dashbord extends Component {
+import { connect } from 'react-redux';
+import {setToken, logoutAction, setDevices} from './../actions';
+import urls from './../conf';
+
+class Dashbord extends Component {
     constructor(props){
         super(props)
         this.state = {
-            devices: getMyDevices()
+            devices: []
         }
+    }
+    componentDidMount(){
+        const token = this.props.token;
+        var base_url = urls.dev_url;
+        fetch(`${base_url}device?auth=${token}`)
+        .then(response=>{return response.json()})
+        .then(response=>{
+            this.props.setDevices(response.payload);
+            this.setState({devices: response.payload})
+            //return response.payload
+            console.log(response)
+        })
+        console.log(getMyDevices(this.props.token));
     }
     render() {
         return (
@@ -22,3 +39,21 @@ export default class Dashbord extends Component {
         )
     }
 }
+
+const mapStateToProps = ({isLoggedIn, token, devices }) => ({
+    isLoggedIn,
+    token,
+    devices
+  })
+  
+  const mapDispatchToProps = (dispatch) => ({
+    setToken: (token) => dispatch(setToken(token)),
+    logoutAction: () => dispatch(logoutAction()),
+    setDevices: (devices) => dispatch(setDevices(devices))
+  })
+  
+  
+  export default connect(
+    mapStateToProps,
+    mapDispatchToProps
+  )(Dashbord);
