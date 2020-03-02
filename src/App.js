@@ -1,14 +1,13 @@
-import React, {useState, Component} from 'react';
+import React, { Component} from 'react';
 import './App.css';
 
 import Login from './components/pages/Login';
 
 import NavBar from './components/pages/NavBar';
 import Footer from './components/pages/Footer';
-import Toast from './components/toast/Toast';
 
 
-import {BrowserRouter, Route, Switch} from 'react-router-dom';
+import {BrowserRouter, Route} from 'react-router-dom';
 import Devices from './layouts/Devices';
 import Dashbord from './layouts/Dashbord';
 import EditDashbord from './layouts/EditDash';
@@ -16,13 +15,30 @@ import {ProtectedRoute} from './protectedRoute';
 import {UnProtectedRoute} from './unProtectedRoute';
 
 
-
+import { connect } from 'react-redux';
+import {setToken, logoutAction} from './actions';
+import auth from './_services/userService/auth';
 
 
 class App extends Component {
-  constructor(props){
-    super(props)
+  
+  componentDidMount(){
+    try {
+      const token =window.localStorage.token;
+      if(typeof token !== "undefined")
+      {
+        this.props.setToken(token);
+        auth.login(() => {
+          this.props.history.push("/dashbord/");
+        });
+      }
+      
+    } catch (error) {
+      console.log(error.toString());
+    }
+    
   }
+  
   render() {
     console.log(this.props)
     return (
@@ -34,10 +50,24 @@ class App extends Component {
           <ProtectedRoute path="/dashbord" component={Dashbord}></ProtectedRoute>
           <ProtectedRoute path="/editDevices" component={EditDashbord}></ProtectedRoute>
         <Footer/>
-        <Toast msg="Hey I am calling from here!!"/>
+        
       </BrowserRouter>
     );
   }
 }
 
-export default App;
+const mapStateToProps = ({isLoggedIn, token }) => ({
+  isLoggedIn,
+  token
+})
+
+const mapDispatchToProps = (dispatch) => ({
+  setToken: (token) => dispatch(setToken(token)),
+  logoutAction: () => dispatch(logoutAction())
+})
+
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(App);
