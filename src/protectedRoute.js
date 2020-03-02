@@ -13,7 +13,7 @@ export const ProtectedRoute = ({
         if (auth.isAuthenticated()) {
           return <Component {...props} />;
         } else {
-            alert("Not Allowed, Sign In Please")
+            //alert("Not Allowed, Sign In Please")
           return (
             <Redirect
               to={{

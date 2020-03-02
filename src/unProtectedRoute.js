@@ -13,7 +13,7 @@ export const UnProtectedRoute = ({
         if (!auth.isAuthenticated()) {
           return <Component {...props} />;
         } else {
-            alert("Already sign in, Logout first")
+            //alert("Already sign in, Logout first")
           return (
             <Redirect
               to={{
