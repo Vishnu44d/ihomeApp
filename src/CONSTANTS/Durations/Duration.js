@@ -1,27 +1,27 @@
 const shortdurations = [
     {
         disp:"last 1 min",
-        value: "1 m"
+        value: "1m"
     },
     {
         disp:"last 2 min",
-        value: "2 m"
+        value: "2m"
     },
     {
         disp:"last 5 min",
-        value: "5 m"
+        value: "5m"
     },
     {
         disp:"last 15 min",
-        value: "15 m"
+        value: "24h"
     },
     {
         disp:"last 30 min",
-        value: "30 m"
+        value: "30m"
     },
     {
         disp:"last 1 hr",
-        value: "60 m"
+        value: "1h"
     },
     {
         disp:"last 6 hr",

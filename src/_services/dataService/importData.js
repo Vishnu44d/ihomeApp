@@ -1,37 +1,58 @@
-function getMedata(){
-    //console.log("Function geteData() is called");
-    return Math.floor(Math.random() * 10);
-}
+import urls from './../../conf';
+var base_url = urls.dev_url;
 
 
+const getLatestData = async (id, token) => fetch(`${base_url}device/getlatestdata`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ 
+        "id": id,
+        "token": token
+    })
+}).then(response => response.json())
 
-function DateOffset( offset ) {
-    return new Date( +new Date + offset );
-}
-
-function getRangeData(freq, duration){
-    let l = []
-    let d = []
-    console.log("DURATION:: ", duration)
-    console.log("FREQ--:: ", freq)
-    let j;
-    let dd1 = Date.now();
-    //console.log(new Date(dd1));
-    let dd = dd1-duration*60*1000;
-    //console.log("-date Dte ", dd, " ", new Date(dd));
-    for(let i=1; dd<dd1; i=i+freq)
-    {
-        dd = dd + freq*1000;
-        //console.log("+new date , i",i,"  ", new Date(dd));
-        l.push(dd);
-        d.push(getMedata());
-    }
-    //console.log(l)
+const getMedata = async (id, token) => {
+    const data = await getLatestData(id, token);
+    let d = data.data[0];
+    console.log(d);
+    let l = d.time
+    let dd = d.last
     return {
         label: l,
-        data: d,
+        data: dd,
     }
-
 }
 
-export {getMedata, getRangeData, DateOffset}
+
+const getData = async (id, duration, token) => fetch(`${base_url}device/getrangedata`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ 
+        "id": id,
+        "duration": duration,
+        "token": token
+    })
+}).then(response => response.json())
+
+const getRangeData = async (id, duration, token) => {
+    console.log(duration);
+    const data = await getData(id, duration, token);
+    let d = data.data;
+    console.log(data);
+    let l = []
+    let dd = []
+    for(let i=0; i<d.length; i++){
+        let item = d[i];
+        l.push(new Date(item.time));
+        dd.push(item.value);
+    }
+    console.log(l);
+    console.log(dd);
+    return {
+        label: l,
+        data: dd,
+    }
+}
+
+
+export {getRangeData, getMedata}

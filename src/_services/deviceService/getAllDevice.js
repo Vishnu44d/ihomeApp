@@ -1,15 +1,13 @@
-export default function getMyDevices(){
-    let r = []
-    for(let i=0;i<10;i++)
-    {
-        let g = {
-            name: `name${i}`,
-            location: `loaction-${i}`,
-            port: `port_${i+1}`,
-            status: Math.round(Math.random())===0?false:true,
-            id: `id-${9-i}`
-        }
-        r.push(g);
-    }
-    return r;
+import urls from './../../conf';
+
+var base_url = urls.dev_url;
+export default function getMyDevices(token){
+
+    return fetch(`${base_url}device?auth=${token}`)
+    .then(response=>{return response.json()})
+    .then(response=>{
+        return response.payload
+    })
+    
 }
+
