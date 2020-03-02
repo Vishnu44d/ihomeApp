@@ -1,9 +1,9 @@
-import React, { useState, Component } from 'react';
+import React, { Component } from 'react';
 import { MDBIcon } from "mdbreact";
 import {Dropdown} from 'reactstrap';
 import auth from './../../_services/userService/auth';
 import Spin from './../spinner/Spin';
-import getMyDevices from './../../_services/deviceService/getAllDevice';
+import userService from './../../_services/userService/user';
 import {
   Collapse,
   Navbar,
@@ -21,6 +21,10 @@ import {
 } from 'reactstrap';
 import {Link} from 'react-router-dom';
 
+
+import { connect } from 'react-redux';
+import {setToken, logoutAction} from './../../actions';
+
 class NavBar extends Component{
   constructor(props){
     super(props)
@@ -30,15 +34,30 @@ class NavBar extends Component{
       isOpenProfile: false,
       loading: false,
       logout: false,
-      devices: getMyDevices()
+      devices: []
     }
     this.toggle = this.toggle.bind(this);
     this.handleLogout = this.handleLogout.bind(this);
   }
-  handleLogout(){
+
+  
+  componentWillReceiveProps(nextProps){
+    console.log(nextProps);
+    if (nextProps.isLoggedIn && nextProps !== null){
+      //console.log("calling from navbar ", getMyDevices(nextProps.token))
+      console.log("Calling from Nav After props")
+      this.setState({devices: nextProps.devices});
+    }
+  }
+  
+
+  handleLogout(e){
+    e.preventDefault()
+    userService.logout();
+    this.props.logoutAction();
     auth.logout(()=>{
       //this.context.history.push('/')
-      this.setState({logout:true})
+      this.setState({logout:true, devices:[]})
       this.props.history.push("/");
     })
     
@@ -77,6 +96,10 @@ class NavBar extends Component{
                 </DropdownToggle>
                 <DropdownMenu right className="text-white">
                   {
+                    this.state.devices.length === 0?
+                      <DropdownItem>
+                        No device.
+                      </DropdownItem>:
                     this.state.devices.map((item, index)=>{
                       return (
                         <DropdownItem key={index}>
@@ -86,7 +109,8 @@ class NavBar extends Component{
                       )
                     })
                   }
-                  
+                  {
+                    /*
                   <DropdownItem>
                     Option 2
                   </DropdownItem>
@@ -94,6 +118,8 @@ class NavBar extends Component{
                   <DropdownItem>
                     Reset
                   </DropdownItem>
+                  */
+                  }
                 </DropdownMenu>
               </UncontrolledDropdown>
             </Nav>
@@ -130,5 +156,19 @@ class NavBar extends Component{
     }
 }
 
+const mapStateToProps = ({isLoggedIn, token, devices }) => ({
+  isLoggedIn,
+  token,
+  devices,
+})
 
-export default NavBar;
+const mapDispatchToProps = (dispatch) => ({
+  setToken: (token) => dispatch(setToken(token)),
+  logoutAction: () => dispatch(logoutAction())
+})
+
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(NavBar);
