@@ -3,7 +3,11 @@ import { MDBIcon } from "mdbreact";
 import { Button, Card, CardBody, CardGroup, Col, Container, Form, Input, InputGroup, InputGroupAddon, InputGroupText, Row } from 'reactstrap';
 import Spin from './../spinner/Spin';
 import auth from './../../_services/userService/auth';
+import userService from './../../_services/userService/user';
+import Toast from './../toast/Toast';
 
+import { connect } from 'react-redux';
+import {setToken} from './../../actions';
 
 class Login extends Component {
   constructor(props){
@@ -13,7 +17,8 @@ class Login extends Component {
       password: '',
       submitted: false,
       error: '',
-      loading: false
+      loading: false,
+      isSuccess: true
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleLogin = this.handleLogin.bind(this);
@@ -25,28 +30,33 @@ class Login extends Component {
     this.setState({ [name]: value });
   }
 
+
   handleLogin(e) {
     e.preventDefault();
-
     console.log(this.state)
-    //this.setState({ submitted: true, error:'' });
-    //this.props.setToken('');
     const { username, password } = this.state;
-
-    // stop here if form is invalid
     if (!(username && password)) {
         return;
     }
 
     this.setState({ loading: true });
-    auth.login(() => {
-        this.props.history.push("/dashbord/");
-    });
-    this.setState({loading:false})
+    userService.login(username, password)
+      .then(
+        user => {
+            if(user.status === 'fail')
+                this.setState({ error: user.message, loading: false, isSuccess:false });
+            else{
+                this.props.setToken(user.token);
+                this.setState({isSuccess:true});
+                auth.login(() => {
+                    this.props.history.push("/dashbord/");
+                });
+            }
+        },
+    );
     
-    //console.log(username);
-    //console.log(password);
-    
+    console.log(this.state.error);
+    this.setState({isSuccess:true})
   }
   render() {
     const { username, password, submitted, loading, error } = this.state;
@@ -66,8 +76,6 @@ class Login extends Component {
                         <InputGroupAddon addonType="prepend">
                           <InputGroupText>
                           <MDBIcon icon="user-alt" />
-
-                            
                           </InputGroupText>
                         </InputGroupAddon>
                         <Input type="text" placeholder="Username" autoComplete="username" name="username" value={username} onChange={this.handleChange}/>
@@ -113,10 +121,29 @@ class Login extends Component {
             </Col>
           </Row>
         </Container>
+        {
+          this.state.isSuccess===true?<div></div>:
+          <Toast msg={error}/>
+        }
+        
       </div>
       </div>
     );
   }
 }
 
-export default Login;
+
+const mapStateToProps = ({isLoggedIn, token }) => ({
+  isLoggedIn,
+  token
+})
+
+const mapDispatchToProps = (dispatch) => ({
+  setToken: (token) => dispatch(setToken(token))
+})
+
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Login);

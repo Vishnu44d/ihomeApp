@@ -1,11 +1,9 @@
 import React, { Component } from 'react';
-import { Card, Button, CardTitle, CardText } from 'reactstrap';
+import { Card, CardTitle, CardText } from 'reactstrap';
 
 
 export default class AboutCard extends Component {
-    constructor(props){
-        super(props)
-    }
+    
     render() {
         return (
             <div>
