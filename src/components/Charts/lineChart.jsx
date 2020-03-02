@@ -33,7 +33,7 @@ class ChartsPage extends React.Component {
     componentWillReceiveProps({my_freq, my_duration, init_data, device_id}){
       
       //console.log(this.state);
-      console.log("INSIDE RECV ", device_id)
+      //console.log("INSIDE RECV ", device_id)
       this.setState({
         labels:[],
         data:[],
@@ -51,7 +51,7 @@ class ChartsPage extends React.Component {
       })
 
       let res = init_data
-      console.log("Chart Mount I recieved ", res);
+      //console.log("Chart Mount I recieved ", res);
       this.setState({
         labels: res.label,
         data: res.data,
@@ -93,9 +93,9 @@ class ChartsPage extends React.Component {
     
 
     componentDidMount() {
-      console.log(this.props.device_id)
+      //console.log(this.props.device_id)
       this.setState({id: this.props.device_id})
-      console.log("FROM THE CHART ", this.state.device_id);
+      //console.log("FROM THE CHART ", this.state.device_id);
     }
   componentWillMount(){
     

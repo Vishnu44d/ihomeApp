@@ -23,6 +23,7 @@ class Devices extends Component {
             device_id: "",
             min: null,
             max: null,
+            monitoring: false,
             currentValue: 0,
             location: "",
             about: [],
@@ -42,6 +43,7 @@ class Devices extends Component {
     componentDidMount(){
         let name = this.props.history.location.pathname.split("/")
         name = name[2]+"/"+name[3]
+
         let r = getDataOf(name, this.props.devices);
         if(r===null)
         {
@@ -54,6 +56,7 @@ class Devices extends Component {
         this.setState({
             device_name: name,
             device_id:r.id,
+            monitoring: r.monitoring,
             min: r.min_intensity,
             max: r.max_intensity,
             about: [r.desc],
@@ -62,12 +65,14 @@ class Devices extends Component {
             Graphlabel: r.desc,
             graphName: r.desc,
         })
-        getRangeData(r.id, this.props.duration, this.props.token).then(res=>{
-            console.log(res)
-            this.setState({
-                init_data: res
+        if(r.monitoring){
+            getRangeData(r.id, this.props.duration, this.props.token).then(res=>{
+                console.log(res)
+                this.setState({
+                    init_data: res
+                })
             })
-        })
+        }
         this.setState({loading:false})
         this.unlisten = this.props.history.listen((location, action) => {
             //console.log("on route change ", location);
@@ -86,17 +91,20 @@ class Devices extends Component {
                 device_id:r.id,
                 min: r.min_intensity,
                 max: r.max_intensity,
+                monitoring: r.monitoring,
                 about: [r.desc],
                 location: r.location,
                 currentValue: r.cur_intensity,
                 Graphlabel: r.desc,
                 graphName: r.desc,
             })
-            getRangeData(r.id, this.props.duration, this.props.token).then(res=>{
-                this.setState({
-                    init_data: res
+            if(r.monitoring){
+                getRangeData(r.id, this.props.duration, this.props.token).then(res=>{
+                    this.setState({
+                        init_data: res
+                    })
                 })
-            })
+            }
             this.setState({loading:false})
         });
         
@@ -106,12 +114,14 @@ class Devices extends Component {
     componentWillReceiveProps(nextProps){
         //console.log("Recieve props", nextProps);
         this.setState({loading:true})
-        getRangeData(this.state.device_id, nextProps.duration, this.props.token).then(res=>{
-            console.log(res);
-            this.setState({
-                init_data: res
+        if(this.state.monitoring){
+            getRangeData(this.state.device_id, nextProps.duration, this.props.token).then(res=>{
+                console.log(res);
+                this.setState({
+                    init_data: res
+                })
             })
-        })
+        }
         
         this.setState({loading:false})
     }
@@ -127,9 +137,27 @@ class Devices extends Component {
         //const device_name = this.props.history.location.pathname.split("/")[2]
         const {device_name, min, max, currentValue, about, graphName } = this.state;
         const init_data = this.state.init_data;
-        console.log("INSIDE DEVICES:: ", this.state.device_id)
+        console.log("INSIDE DEVICES MONTIT:: ", this.state.monitoring)
         if(this.state.error){
             return <Toast msg={this.state.err_msg}/>
+        }
+        if(!this.state.monitoring){
+            return (
+                <MDBContainer>
+                    <AboutCard about={about} name={this.state.device_name}/>
+                    <Box size="50px" />
+                    <AboutCard about={["Monitoring is off for this device"]} name={"No chart available"}/>
+                    <Box size="50px" />
+                    <Range
+                    data = {{
+                        device: device_name,
+                        min: min,
+                        max: max,
+                        currentValue: currentValue
+                    }}
+                    />                    
+                </MDBContainer>
+            )
         }
         else{
             return (
@@ -137,6 +165,7 @@ class Devices extends Component {
                 <MDBContainer>
                     <AboutCard about={about} name={this.state.device_name}/>
                     <Box size="50px" />
+                    
                     <Row>
                         <Col md={8} sm={1}>
                         <h3>{graphName}</h3>
