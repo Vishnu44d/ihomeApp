@@ -1,8 +1,11 @@
-import {USER} from './../CONSTANTS/User';
 
 const setToken = (token) => ({
     type: "LOGIN",
     token,
+})
+const setDevices = (device) => ({
+    type: "DEVICE",
+    device,
 })
 
 const setFreq = (freq) => ({
@@ -15,4 +18,8 @@ const setMyDuration = (duration) => ({
     duration
 })
 
-export {setToken, setFreq, setMyDuration};
+const logoutAction = () => ({
+    type: 'LOGOUT'
+})
+
+export {setToken, setFreq, setMyDuration, logoutAction, setDevices};
