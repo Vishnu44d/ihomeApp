@@ -1,7 +1,7 @@
 import React from "react";
 import { Line } from "react-chartjs-2";
 import { MDBContainer } from "mdbreact";
-import {getMedata, getRangeData} from './../../_services/dataService/importData';
+import {getMedata} from './../../_services/dataService/importData';
 
 
 import Box from './../box/Box';
@@ -20,18 +20,24 @@ class ChartsPage extends React.Component {
           labels:[],
           data:[],
           name: this.props.title,
+          device_id: this.props.device_id,
           freq: f,
           duration: i,
         }    
     }
 
+    componentWillUnmount(){
+      clearInterval(this.interval);
+    }
     
-    componentWillReceiveProps({my_freq, my_duration, init_data}){
+    componentWillReceiveProps({my_freq, my_duration, init_data, device_id}){
       
       //console.log(this.state);
+      console.log("INSIDE RECV ", device_id)
       this.setState({
         labels:[],
-        data:[]
+        data:[],
+        device_id: device_id
       })
 
       const f = my_freq;
@@ -45,7 +51,7 @@ class ChartsPage extends React.Component {
       })
 
       let res = init_data
-      //console.log("Chart Mount I recieved ", res);
+      console.log("Chart Mount I recieved ", res);
       this.setState({
         labels: res.label,
         data: res.data,
@@ -60,11 +66,14 @@ class ChartsPage extends React.Component {
       this.interval = setInterval(() => {
         //console.log("INSIDE INTERVAL:: ",my_freq)
         //console.log("INSIDE INTERVAL:: ", this.state.labels);
-        this.setState(
-        { 
-            labels: this.state.labels.concat([new Date()]),
-            data: this.state.data.concat([getMedata()])
+        getMedata(device_id, this.props.token).then(res => {
+          this.setState(
+          { 
+              labels: this.state.labels.concat([res.label]),
+              data: this.state.data.concat([res.data])
+          })
         })
+        
         let new_l = [...this.state.labels];
         let new_d = [...this.state.data];
         new_l.shift();
@@ -84,9 +93,12 @@ class ChartsPage extends React.Component {
     
 
     componentDidMount() {
-      
+      console.log(this.props.device_id)
+      this.setState({id: this.props.device_id})
+      console.log("FROM THE CHART ", this.state.device_id);
     }
   componentWillMount(){
+    
     
   }
 
@@ -159,9 +171,10 @@ class ChartsPage extends React.Component {
   }
 }
 
-const mapStateToProps = ({freq, duration }) => ({
+const mapStateToProps = ({freq, duration, token }) => ({
   freq,
-  duration
+  duration,
+  token
 })
 
 const mapDispatchToProps = (dispatch) => ({
