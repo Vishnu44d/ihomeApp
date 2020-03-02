@@ -13,6 +13,25 @@ const loggedinReducer = (state=false, action) => {
     }
 }
 
+const loginReducer = (state=null, action) => {
+    //console.log("USER REDUCER CALL ", action.type, " ", USER.LOAD_SUCCESS);
+    if (action.type === 'LOGIN'){
+        return action.token;
+    }
+    else if (action.type === 'LOGOUT'){
+        return null
+    }
+    return state;
+}
+
+const deviceReducer = (state=[], action) => {
+    if (action.type === 'DEVICE')
+    {
+        return action.device
+    }
+    return state
+}
+
 const freqReducer = (state="5 s", action) => {
     switch(action.type){
         case "FREQ":
@@ -22,7 +41,7 @@ const freqReducer = (state="5 s", action) => {
     }
 }
 
-const durationReducer = (state="15 m", action) => {
+const durationReducer = (state="24h", action) => {
     switch(action.type){
         case "DURATION":
             return action.duration;
@@ -37,7 +56,9 @@ const allReducers = combineReducers({
     //list of all reducers here
     isLoggedIn: loggedinReducer,
     freq: freqReducer,
-    duration: durationReducer
+    duration: durationReducer,
+    token: loginReducer,
+    devices: deviceReducer
 })
 
 export default allReducers;

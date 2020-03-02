@@ -8,7 +8,8 @@ const configStore = () => {
     const store = createStore(
         allReducers,
         compose(
-            applyMiddleware(sagaMiddleware)
+            applyMiddleware(sagaMiddleware),
+            window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
         ),
     );
     sagaMiddleware.run(rootSage);
