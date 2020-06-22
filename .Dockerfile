@@ -9,5 +9,5 @@ RUN npm run build
 
 FROM nginx:alpine
 LABEL maintainer="Vishnu"
-COPY --from=node-build-env /app/dist/* /usr/share/nginx/html/
+COPY --from=node-build-env /app/build/* /usr/share/nginx/html/
 EXPOSE 80
